@@ -1,0 +1,12 @@
+/.mvn/
+/target/
+/bank.ids
+/bank.iml
+/bank.ipr
+/bank.iws
+/mvnw
+/mvnw.cmd
+/out/
+/app/
+/lib/
+/.idea/
