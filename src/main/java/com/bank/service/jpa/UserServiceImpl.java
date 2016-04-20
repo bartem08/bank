@@ -4,9 +4,8 @@ import com.bank.model.User;
 import com.bank.repository.UserRepository;
 import com.bank.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -20,23 +19,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findById(Integer id) {
-        return userRepository.findById(id);
-    }
-
-    @Override
-    public void create(final User user) throws Exception {
-        userRepository.createUser(user);
-    }
-
-    @Override
-    public List getUserAccounts(Integer id) {
-        return userRepository.findUserAccounts(id);
-    }
-
-    @Override
-    public void update(final User user) throws Exception {
-        userRepository.updateUser(user);
+    public User createUser(User user) throws Exception {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
 }

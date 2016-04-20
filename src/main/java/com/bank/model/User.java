@@ -2,9 +2,8 @@ package com.bank.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
-import org.hibernate.validator.constraints.Email;
-
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -14,42 +13,35 @@ public class User implements Serializable {
     private Integer id;
 
     @NotNull @Size(min = 2, max = 50)
-    @Column(name = "first_name",
-            nullable = false,
-            length = 50)
+    @Column(name = "first_name")
     private String firstName;
 
     @NotNull @Size(min = 2, max = 50)
     @Column(name = "last_name")
     private String lastName;
 
-    @NotNull @Email
-    @Column(name = "mail")
-    private String mail;
-
-    @NotNull @Pattern(regexp = "^\\d{10}$")
-    @Column(name = "phone")
-    private String phone;
-
     @NotNull
     @Column(name = "inn")
     private String inn;
 
     @NotNull @Size(min = 4)
-    @Column(name = "psw")
+    @Column(name = "password")
     private String password;
 
     @Column(name = "enabled")
-    protected Boolean enabled;
+    private boolean enabled;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Role> roles;
 
     public User() {}
 
-    public User(String firstName, String lastName, String mail, String inn, String phone) {
+    public User(String firstName, String lastName, String inn, String password, List<Role> roles) {
         setFirstName(firstName);
         setLastName(lastName);
-        setMail(mail);
         setInn(inn);
-        setPhone(phone);
+        setPassword(password);
+        setRoles(roles);
         setEnabled(true);
     }
 
@@ -77,14 +69,6 @@ public class User implements Serializable {
         this.lastName = lastName;
     }
 
-    public String getMail() {
-        return mail;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
-    }
-
     public String getInn() {
         return inn;
     }
@@ -93,20 +77,12 @@ public class User implements Serializable {
         this.inn = inn;
     }
 
-    public Boolean getEnabled() {
+    public boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getPassword() {
@@ -115,6 +91,14 @@ public class User implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
     @Override
@@ -132,5 +116,5 @@ public class User implements Serializable {
     public int hashCode() {
         return inn != null ? inn.hashCode() : 0;
     }
-    
+
 }

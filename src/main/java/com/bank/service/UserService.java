@@ -8,12 +8,6 @@ public interface UserService {
 
     User findByInn(String inn);
 
-    User findById(Integer id);
-
-    void create(User user) throws Exception;
-
-    List getUserAccounts(Integer id);
-
-    void update(User user) throws Exception;
+    User createUser(User user) throws Exception;
 
 }
