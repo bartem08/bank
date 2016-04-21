@@ -8,6 +8,8 @@ public interface UserService {
 
     User findByInn(String inn);
 
+    User findById(Integer id);
+
     User createUser(User user) throws Exception;
 
 }

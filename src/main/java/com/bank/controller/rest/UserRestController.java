@@ -27,6 +27,16 @@ public class UserRestController {
         }
     }
 
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public ResponseEntity getUserById(@PathVariable("id") Integer id) {
+        final User user = userService.findById(id);
+        if (user == null) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(new UserDTO(user), HttpStatus.OK);
+        }
+    }
+
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity registerUser(@RequestBody @Valid User user,
                                        BindingResult result) {
