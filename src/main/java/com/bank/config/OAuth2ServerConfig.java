@@ -31,10 +31,10 @@ public class OAuth2ServerConfig extends AuthorizationServerConfigurerAdapter {
         clients.inMemory()
                 .withClient("android-client")
                     .authorizedGrantTypes("password", "implicit", "authorization_code")
-                    .authorities("ROLE_CLIENT")
                     .scopes("trust")
                     .resourceIds("oauth2-resource")
-                    .accessTokenValiditySeconds(600);
+                    .accessTokenValiditySeconds(600)
+                    .secret("android-client");
     }
 
 }

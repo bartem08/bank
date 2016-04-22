@@ -17,7 +17,7 @@ public class UserRestController {
     @Autowired
     private UserService userService;
 
-    @RequestMapping(value = "/inn", method = RequestMethod.POST)
+    @RequestMapping(value = "/me", method = RequestMethod.POST)
     public ResponseEntity getUserByInn(@RequestParam("inn") String inn) {
         final User user = userService.findByInn(inn);
         if (user == null) {
@@ -50,6 +50,5 @@ public class UserRestController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
         }
     }
-
 
 }
