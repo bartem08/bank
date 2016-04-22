@@ -3,6 +3,7 @@ package com.bank;
 import com.bank.config.CustomUserDetails;
 import com.bank.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
@@ -59,11 +60,11 @@ public class BankApplication {
 					.withClient("android-client")
 					.authorizedGrantTypes("password", "implicit", "authorization_code")
 					.scopes("trust")
+					.authorities("ROLE_USER")
 					.resourceIds("oauth2-resource")
 					.accessTokenValiditySeconds(600)
-					.secret("android-client");
+					.autoApprove(true);
 		}
-
 	}
 
 	@Configuration
@@ -73,8 +74,6 @@ public class BankApplication {
 		@Override
 		public void configure(HttpSecurity http) throws Exception {
 			http
-					.csrf()
-					.disable()
 					.authorizeRequests()
 					.antMatchers("/bank/users/register")
 					.permitAll()
