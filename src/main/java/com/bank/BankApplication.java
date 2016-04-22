@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -45,8 +47,7 @@ public class BankApplication {
 		@Override
 		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 			endpoints
-					.authenticationManager(authenticationManager)
-					.approvalStoreDisabled();
+					.authenticationManager(authenticationManager);
 		}
 
 		@Override
@@ -57,10 +58,11 @@ public class BankApplication {
 		@Override
 		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.inMemory()
-					.withClient("android-client")
+					.withClient("cl")
+					.secret("123")
 					.authorizedGrantTypes("password", "implicit", "authorization_code")
 					.scopes("trust")
-					.authorities("ROLE_USER")
+					.authorities("ROLE_CLIENT")
 					.resourceIds("oauth2-resource")
 					.accessTokenValiditySeconds(600)
 					.autoApprove(true);
