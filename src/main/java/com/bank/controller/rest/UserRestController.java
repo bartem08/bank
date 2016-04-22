@@ -18,7 +18,7 @@ public class UserRestController {
     private UserService userService;
 
     @RequestMapping(value = "/me", method = RequestMethod.POST)
-    public ResponseEntity getUserByInn(@RequestParam("inn") String inn) {
+    public ResponseEntity getUserByInn(@RequestBody String inn) {
         final User user = userService.findByInn(inn);
         if (user == null) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -37,7 +37,7 @@ public class UserRestController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     public ResponseEntity registerUser(@RequestBody @Valid User user,
                                        BindingResult result) {
         if (result.hasErrors()) {
