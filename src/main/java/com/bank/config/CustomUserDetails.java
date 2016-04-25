@@ -1,26 +1,30 @@
 package com.bank.config;
 
-import com.bank.model.*;
+import com.bank.model.Profile;
+import com.bank.model.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class CustomUserDetails implements UserDetails, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private String inn;
+
+    private String psw;
+
     private Collection<? extends GrantedAuthority> authorities;
 
-    private String password;
-
-    private String username;
-
-    public CustomUserDetails(User user) {
-        this.username = user.getInn();
-        this.password = user.getPassword();
-        this.authorities = translate(user.getRoles());
+    public CustomUserDetails(Profile profile) {
+        this.inn = profile.getInn();
+        this.psw = profile.getPassword();
+        this.authorities = translate(profile.getRoles());
     }
 
     private Collection<? extends GrantedAuthority> translate(List<Role> roles) {
@@ -42,12 +46,12 @@ public class CustomUserDetails implements UserDetails, Serializable {
 
     @Override
     public String getPassword() {
-        return password;
+        return psw;
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return inn;
     }
 
     @Override

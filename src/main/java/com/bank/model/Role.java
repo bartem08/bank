@@ -15,12 +15,12 @@ public class Role implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "user_inn", referencedColumnName = "inn")
-    private User user;
+    private Profile profile;
 
     public Role() {}
 
-    public Role(User user, String role) {
-        setUser(user);
+    public Role(Profile profile, String role) {
+        setProfile(profile);
         setRole(role);
     }
 
@@ -40,11 +40,11 @@ public class Role implements Serializable {
         this.role = role;
     }
 
-    public User getUser() {
-        return user;
+    public Profile getProfile() {
+        return profile;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }

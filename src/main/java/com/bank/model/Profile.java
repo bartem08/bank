@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User implements Serializable {
+public class Profile implements Serializable {
 
     @Id @GeneratedValue
     private Integer id;
@@ -31,12 +31,12 @@ public class User implements Serializable {
     @Column(name = "enabled")
     private boolean enabled;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
     private List<Role> roles;
 
-    public User() {}
+    public Profile() {}
 
-    public User(String firstName, String lastName, String inn, String password, List<Role> roles) {
+    public Profile(String firstName, String lastName, String inn, String password, List<Role> roles) {
         setFirstName(firstName);
         setLastName(lastName);
         setInn(inn);
@@ -106,9 +106,9 @@ public class User implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        User user = (User) o;
+        Profile profile = (Profile) o;
 
-        return inn != null ? inn.equals(user.inn) : user.inn == null;
+        return inn != null ? inn.equals(profile.inn) : profile.inn == null;
 
     }
 

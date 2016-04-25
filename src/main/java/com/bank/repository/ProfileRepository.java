@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface ProfileRepository extends JpaRepository<Profile, Integer> {
 
-    User findByInn(String inn);
+    Profile findByInn(String inn);
 
-    User findById(Integer id);
+    Profile findById(Integer id);
 
 }

@@ -1,16 +1,16 @@
 package com.bank.model.dto;
 
-import com.bank.model.User;
+import com.bank.model.Profile;
 
-public class UserDTO {
+public class ProfileDTO {
 
     private String firstName;
 
     private String lastName;
 
-    public UserDTO(final User user) {
-        setFirstName(user.getFirstName());
-        setLastName(user.getLastName());
+    public ProfileDTO(final Profile profile) {
+        setFirstName(profile.getFirstName());
+        setLastName(profile.getLastName());
     }
 
     public String getFirstName() {
