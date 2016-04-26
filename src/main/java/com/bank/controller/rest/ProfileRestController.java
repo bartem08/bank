@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/bank/users")
@@ -17,24 +18,9 @@ public class ProfileRestController {
     @Autowired
     private ProfileService profileService;
 
-    @RequestMapping(value = "/me", method = RequestMethod.POST)
-    public ResponseEntity getUserByInn(@RequestBody String inn) {
-        final Profile profile = profileService.findByInn(inn);
-        if (profile == null) {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(new ProfileDTO(profile), HttpStatus.OK);
-        }
-    }
-
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    public ResponseEntity getUserById(@PathVariable("id") Integer id) {
-        final Profile profile = profileService.findById(id);
-        if (profile == null) {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(new ProfileDTO(profile), HttpStatus.OK);
-        }
+    @RequestMapping(value = "/me", method = RequestMethod.GET)
+    public ResponseEntity getUser(Principal principal) {
+        return new ResponseEntity<>(new ProfileDTO(profileService.findByInn(principal.getName())), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)

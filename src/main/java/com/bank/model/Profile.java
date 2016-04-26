@@ -34,14 +34,18 @@ public class Profile implements Serializable {
     @OneToMany(mappedBy = "profile", fetch = FetchType.EAGER)
     private List<Role> roles;
 
+    @OneToMany(mappedBy = "profile")
+    private List<Account> accounts;
+
     public Profile() {}
 
-    public Profile(String firstName, String lastName, String inn, String password, List<Role> roles) {
+    public Profile(String firstName, String lastName, String inn, String password, List<Role> roles, List<Account> accounts) {
         setFirstName(firstName);
         setLastName(lastName);
         setInn(inn);
         setPassword(password);
         setRoles(roles);
+        setAccounts(accounts);
         setEnabled(true);
     }
 
@@ -99,6 +103,14 @@ public class Profile implements Serializable {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public List<Account> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(List<Account> accounts) {
+        this.accounts = accounts;
     }
 
     @Override
