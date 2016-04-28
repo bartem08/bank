@@ -9,7 +9,7 @@ import java.util.List;
 @Table(name = "users")
 public class Profile implements Serializable {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue @Null
     private Integer id;
 
     @NotNull @Size(min = 2, max = 50)

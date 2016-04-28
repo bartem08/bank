@@ -6,6 +6,8 @@ import com.bank.service.AccountManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.*;
+
+import java.security.Principal;
 import java.util.List;
 
 @Service
@@ -27,16 +29,27 @@ public class AccountManagementImpl implements AccountManagement {
             rollbackFor = Exception.class)
     public void updateBalance(final Transfer transfer) {
         final Account from = transfer.getFromAccount();
-        final float fromBalance = from.getBalance() - transfer.getSaldo();
-        if (fromBalance < 0) {
-            throw new RuntimeException("Not enough money");
+        decreaseBalance(from, transfer);
+        final Account to = transfer.getToAccount();
+        increaseBalance(to, transfer);
+        accountRepository.save(from);
+        accountRepository.save(to);
+        saveOperation(transfer);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE,
+            transactionManager = "transactionManager",
+            propagation = Propagation.REQUIRED,
+            rollbackFor = Exception.class)
+    public void updateBalance(final Principal principal, final Deposit deposit) {
+        if (!checkIfDepositExists(principal)) {
+            throw new RuntimeException("Has opened deposits");
         } else {
-            from.setBalance(fromBalance);
-            accountRepository.save(from);
-            final Account to = transfer.getToAccount();
-            to.setBalance(to.getBalance() + transfer.getSaldo());
-            accountRepository.save(to);
-            createOperation(transfer);
+            final Account account = deposit.getToAccount();
+            increaseBalance(account, deposit);
+            accountRepository.save(account);
+            saveOperation(deposit);
         }
     }
 
@@ -45,23 +58,19 @@ public class AccountManagementImpl implements AccountManagement {
             transactionManager = "transactionManager",
             propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class)
-    public void updateBalance(Deposit deposit) {
+    public void closeDeposit(final Deposit deposit) {
         final Account account = deposit.getToAccount();
-        final float balance = account.getBalance();
-        if (balance < 0) {
-            throw new RuntimeException("Balance must be > 0 before deposit");
-        } else {
-            account.setBalance(balance + deposit.getSaldo());
-            accountRepository.save(account);
-            createOperation(deposit);
-        }
+        decreaseBalance(account, deposit);
+        deposit.setClosed(true);
+        accountRepository.save(account);
+        depositRepository.save(deposit);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE,
             transactionManager = "transactionManager",
             propagation = Propagation.MANDATORY,
             rollbackFor = Exception.class)
-    private void createOperation(Transfer transfer) {
+    private void saveOperation(final Transfer transfer) {
         if (transfer.getId() != null) {
             throw new RuntimeException();
         } else {
@@ -73,42 +82,64 @@ public class AccountManagementImpl implements AccountManagement {
             transactionManager = "transactionManager",
             propagation = Propagation.MANDATORY,
             rollbackFor = Exception.class)
-    private void createOperation(Deposit deposit) {
+    private void saveOperation(final Deposit deposit) {
         if (deposit.getId() != null) {
-            throw new RuntimeException();
+            throw new RuntimeException("Id must be null");
         } else {
             depositRepository.save(deposit);
         }
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE,
+            transactionManager = "transactionManager",
+            propagation = Propagation.MANDATORY,
+            rollbackFor = Exception.class)
+    private void decreaseBalance(final Account account, final Operation operation) {
+        final float actualBalance = account.getBalance();
+        final float finalBalance = actualBalance - operation.getSaldo();
+        if (finalBalance < 0) {
+            throw new RuntimeException("Not enough money");
+        } else {
+            account.setBalance(finalBalance);
+        }
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE,
+            transactionManager = "transactionManager",
+            propagation = Propagation.MANDATORY,
+            rollbackFor = Exception.class)
+    private void increaseBalance(final Account account, final Operation operation) {
+        final float finalBalance = account.getBalance() + operation.getSaldo();
+        account.setBalance(finalBalance);
+    }
+
+    private boolean checkIfDepositExists(final Principal principal) {
+        List<Account> accounts = accountRepository.findByProfileInn(principal.getName());
+        for (Account account: accounts) {
+            Deposit deposit = depositRepository.findByToAccountId(account.getId());
+            if (deposit != null && !deposit.isClosed()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
-    public Account createAccount(Account account) {
+    public Account createAccount(final Account account) {
         return accountRepository.save(account);
     }
 
     @Override
-    public List<Account> getAccountByProfileInn(String userInn) {
+    public List<Account> getAccountByProfileInn(final String userInn) {
         return accountRepository.findByProfileInn(userInn);
     }
 
     @Override
-    public Account getAccountById(Integer accountId) {
+    public Account getAccountById(final Integer accountId) {
+        if (!accountRepository.exists(accountId)) {
+            throw new RuntimeException("Account does not exists");
+        }
         return accountRepository.findById(accountId);
     }
 
-
-    @Override
-    public List<Operation> getDepositsByAccountId(Integer accountId) {
-        return depositRepository.findByToAccountId(accountId);
-    }
-
-    @Override
-    public List<Operation> getTransfersInByAccountId(Integer accountId) {
-        return transferRepository.findByToAccountId(accountId);
-    }
-
-    @Override
-    public List<Operation> getTransfersOutByAccountId(Integer accountId) {
-        return transferRepository.findByFromAccountId(accountId);
-    }
 }

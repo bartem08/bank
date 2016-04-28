@@ -25,8 +25,7 @@ public class Operation implements Serializable {
 
     public Operation() {}
 
-    public Operation(Integer id, float saldo, String date, String description) {
-        setId(id);
+    public Operation(float saldo, String date, String description) {
         setSaldo(saldo);
         setDate(date);
         setDescription(description);

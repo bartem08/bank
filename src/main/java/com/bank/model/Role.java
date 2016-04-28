@@ -1,13 +1,14 @@
 package com.bank.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.Null;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "user_roles")
 public class Role implements Serializable {
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue @Null
     private Integer id;
 
     @Column(name = "role")

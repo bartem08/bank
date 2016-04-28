@@ -10,6 +10,6 @@ public interface AccountService {
 
     List<Account> getAccountByProfileInn(String userInn);
 
-    Account getAccountById(Integer accountId);
+    Account getAccountById(Integer accountId) throws RuntimeException;
 
 }

@@ -1,7 +1,6 @@
 package com.bank.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.*;
 
@@ -12,7 +11,7 @@ public class Account implements Serializable {
     @Id @GeneratedValue
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_inn", referencedColumnName = "inn")
     private Profile profile;
 

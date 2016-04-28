@@ -6,6 +6,6 @@ public interface ProfileService {
 
     Profile findByInn(String inn);
 
-    Profile createUser(Profile profile) throws Exception;
+    void createUser(Profile profile);
 
 }

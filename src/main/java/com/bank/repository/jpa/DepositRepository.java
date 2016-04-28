@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface DepositRepository extends JpaRepository<Deposit, Integer> {
 
-    List<Operation> findByToAccountId(Integer id);
+    Deposit findByToAccountId(Integer accountId);
+
 
 }

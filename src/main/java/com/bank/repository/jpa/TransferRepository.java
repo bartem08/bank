@@ -9,9 +9,4 @@ import java.util.List;
 
 @Repository
 public interface TransferRepository extends JpaRepository<Transfer, Integer> {
-
-    List<Operation> findByToAccountId(Integer id);
-
-    List<Operation> findByFromAccountId(Integer id);
-
 }
