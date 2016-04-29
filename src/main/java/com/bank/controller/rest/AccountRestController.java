@@ -61,6 +61,54 @@ public class AccountRestController {
             }
     }
 
+    @RequestMapping(value = "/{id}/operations/out", method = RequestMethod.GET)
+    public ResponseEntity getTransfersOut(@PathVariable("id") Integer id,
+                                         Principal principal) {
+        try {
+            final Account account = checkAccount(principal, id);
+            List<TransferDTO> transfers = account
+                    .getOutTransfers()
+                    .stream()
+                    .map(TransferDTO::new)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(transfers, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @RequestMapping(value = "/{id}/operations/in", method = RequestMethod.GET)
+    public ResponseEntity getTransfersIn(@PathVariable("id") Integer id,
+                                          Principal principal) {
+        try {
+            final Account account = checkAccount(principal, id);
+            List<TransferDTO> transfers = account
+                    .getInTransfers()
+                    .stream()
+                    .map(TransferDTO::new)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(transfers, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @RequestMapping(value = "/{id}/operations/deposit", method = RequestMethod.GET)
+    public ResponseEntity getDeposits(@PathVariable("id") Integer id,
+                                          Principal principal) {
+        try {
+            final Account account = checkAccount(principal, id);
+            List<DepositDTO> deposits = account
+                    .getDeposits()
+                    .stream()
+                    .map(DepositDTO::new)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(deposits, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
     @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
     @RequestMapping(value = "/{id}/operations/deposit", method = RequestMethod.PUT)
     public ResponseEntity addDeposit(@PathVariable("id") Integer id,
@@ -92,17 +140,6 @@ public class AccountRestController {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
         }
 
-    }
-
-    @RequestMapping(value = "/{id}/operations", method = RequestMethod.GET)
-    public ResponseEntity getAllOperations(@PathVariable("id") int id,
-                                           Principal principal) {
-        try {
-            final Account account = checkAccount(principal, id);
-            return new ResponseEntity<>(new OperationsDTO(account), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
-        }
     }
 
     private Account checkAccount(Principal principal, int id) throws RuntimeException {
