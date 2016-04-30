@@ -51,6 +51,7 @@ public class Profile implements Serializable {
         setInn(inn);
         setEmail(email);
         setPassword(password);
+        setEnabled(true);
     }
 
     public Profile(String firstName, String lastName, String inn, String password, List<Role> roles, List<Account> accounts, String email) {
