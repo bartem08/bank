@@ -1,5 +1,6 @@
 package com.bank.service;
 
+import com.bank.model.Account;
 import com.bank.model.Deposit;
 import com.bank.model.Transfer;
 
@@ -7,11 +8,11 @@ import java.security.Principal;
 
 public interface AccountManagement extends AccountService {
 
-    void updateBalance(Transfer transfer);
+    Account updateBalance(Transfer transfer);
 
-    void updateBalance(Principal principal, Deposit deposit);
+    Account updateBalance(Principal principal, Deposit deposit);
 
-    void closeDeposit(Deposit deposit);
+    Account closeDeposit(Deposit deposit);
 
     Transfer saveTransfer(Transfer transfer);
 

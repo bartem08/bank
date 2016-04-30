@@ -30,10 +30,11 @@ public class AccountRestController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity createAccount(Principal principal) {
         try {
-            accountManagement.createAccount(new Account(profileService.findByInn(principal.getName())));
-            return new ResponseEntity(HttpStatus.CREATED);
+            final Account account
+                    = accountManagement.createAccount(new Account(profileService.findByInn(principal.getName())));
+            return new ResponseEntity<>(new AccountDTO(account), HttpStatus.CREATED);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
         }
     }
     
@@ -45,7 +46,7 @@ public class AccountRestController {
             accountDTOs.addAll(accountList.stream().map(AccountDTO::new).collect(Collectors.toList()));
             return new ResponseEntity<>(accountDTOs, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
         }
     }
 
@@ -64,9 +65,9 @@ public class AccountRestController {
             );
             final Profile profile = profileService.findByInn(principal.getName());
             codes.put(transfer.getId(), emailService.sendMail(profile.getEmail()));
-            return new ResponseEntity<>(new TransferDTO(transfer), HttpStatus.OK);
+            return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
 
     }
@@ -81,12 +82,12 @@ public class AccountRestController {
                 checkAccount(principal, transfer.getFromAccount().getId());
                 checkVerificationCode(transfer.getId(), code);
                 accountManagement.updateBalance(transfer);
-                return new ResponseEntity(HttpStatus.OK);
+                return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
             } catch (AccessLockedException ex) {
                 accountManagement.deleteTransfer(id);
-                return new ResponseEntity<>(ex.getMessage(), HttpStatus.LOCKED);
+                return new ResponseEntity<>(new Response(ex.getMessage(), "locked"), HttpStatus.LOCKED);
             } catch (Exception ex) {
-                return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+                return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
             }
     }
 
@@ -102,7 +103,7 @@ public class AccountRestController {
                     .collect(Collectors.toList());
             return new ResponseEntity<>(transfers, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
         }
     }
 
@@ -118,7 +119,7 @@ public class AccountRestController {
                     .collect(Collectors.toList());
             return new ResponseEntity<>(transfers, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
         }
     }
 
@@ -134,7 +135,7 @@ public class AccountRestController {
                     .collect(Collectors.toList());
             return new ResponseEntity<>(deposits, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
         }
     }
 
@@ -146,9 +147,9 @@ public class AccountRestController {
         try {
             final Account account = checkAccount(principal, id);
             accountManagement.updateBalance(principal, new Deposit(account, Calendar.getInstance().getTime(), saldo));
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
     }
 
@@ -163,10 +164,9 @@ public class AccountRestController {
             deposits.stream()
                     .filter(deposit -> deposit.getId() == dId)
                     .forEach(deposit -> accountManagement.closeDeposit(deposit));
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
 
     }

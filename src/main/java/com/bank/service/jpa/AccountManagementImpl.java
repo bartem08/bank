@@ -27,13 +27,13 @@ public class AccountManagementImpl implements AccountManagement {
             transactionManager = "transactionManager",
             propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class)
-    public void updateBalance(final Transfer transfer) {
+    public Account updateBalance(final Transfer transfer) {
         final Account from = transfer.getFromAccount();
         decreaseBalance(from, transfer);
         final Account to = transfer.getToAccount();
         increaseBalance(to, transfer);
-        accountRepository.save(from);
         accountRepository.save(to);
+        return accountRepository.save(from);
     }
 
     @Override
@@ -41,14 +41,14 @@ public class AccountManagementImpl implements AccountManagement {
             transactionManager = "transactionManager",
             propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class)
-    public void updateBalance(final Principal principal, final Deposit deposit) {
+    public Account updateBalance(final Principal principal, final Deposit deposit) {
         if (!checkIfDepositExists(principal)) {
             throw new RuntimeException("Has opened deposits");
         } else {
             final Account account = deposit.getToAccount();
             increaseBalance(account, deposit);
-            accountRepository.save(account);
             saveOperation(deposit);
+            return accountRepository.save(account);
         }
     }
 
@@ -57,12 +57,12 @@ public class AccountManagementImpl implements AccountManagement {
             transactionManager = "transactionManager",
             propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class)
-    public void closeDeposit(final Deposit deposit) {
+    public Account closeDeposit(final Deposit deposit) {
         final Account account = deposit.getToAccount();
         decreaseBalance(account, deposit);
         deposit.setClosed(true);
-        accountRepository.save(account);
         depositRepository.save(deposit);
+        return accountRepository.save(account);
     }
 
     @Override
