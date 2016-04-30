@@ -26,12 +26,12 @@ public class ProfileRestController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity registerUser(@RequestBody @Valid Profile profile,
-                                       BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(result.getFieldError().getDefaultMessage(), HttpStatus.BAD_REQUEST);
-        }
-        profileManagement.createUser(profile);
+    public ResponseEntity registerUser(@RequestParam("firstName") String firstName,
+                                       @RequestParam("lastName") String lastName,
+                                       @RequestParam("inn") String inn,
+                                       @RequestParam("password") String password,
+                                       @RequestParam("email") String email) {
+        profileManagement.createUser(new Profile(firstName, lastName, inn, password, email));
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
