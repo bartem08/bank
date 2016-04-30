@@ -34,7 +34,6 @@ public class AccountManagementImpl implements AccountManagement {
         increaseBalance(to, transfer);
         accountRepository.save(from);
         accountRepository.save(to);
-        saveOperation(transfer);
     }
 
     @Override
@@ -66,16 +65,27 @@ public class AccountManagementImpl implements AccountManagement {
         depositRepository.save(deposit);
     }
 
+    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE,
             transactionManager = "transactionManager",
-            propagation = Propagation.MANDATORY,
+            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class)
-    private void saveOperation(final Transfer transfer) {
+    public Transfer saveTransfer(final Transfer transfer) {
         if (transfer.getId() != null) {
             throw new RuntimeException();
         } else {
-            transferRepository.save(transfer);
+            return transferRepository.save(transfer);
         }
+    }
+
+    @Override
+    public Transfer getTransferById(Integer id) {
+        return transferRepository.findOne(id);
+    }
+
+    @Override
+    public void deleteTransfer(Integer id) {
+        transferRepository.delete(id);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE,

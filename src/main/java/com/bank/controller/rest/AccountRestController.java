@@ -17,10 +17,15 @@ import java.util.stream.Collectors;
 public class AccountRestController {
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private AccountManagement accountManagement;
 
     @Autowired
     private ProfileService profileService;
+
+    private Map<Integer, Integer> codes = new HashMap<>(1000);
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity createAccount(Principal principal) {
@@ -46,16 +51,40 @@ public class AccountRestController {
 
     @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
     @RequestMapping(value = "/{id}/operations/out", method = RequestMethod.PUT)
-    public ResponseEntity addTransferOut(@PathVariable("id") Integer id,
+    public ResponseEntity transferRequest(@PathVariable("id") Integer id,
                                          @RequestParam("to_id") Integer toId,
                                          @RequestParam("saldo") float saldo,
                                          @RequestParam(value = "description", required = false) String description,
                                          Principal principal) {
+        try {
+            final Account from = checkAccount(principal, id);
+            final Account to = accountManagement.getAccountById(toId);
+            final Transfer transfer = accountManagement.saveTransfer(
+                    new Transfer(from, to, Calendar.getInstance().getTime(), saldo, description)
+            );
+            final Profile profile = profileService.findByInn(principal.getName());
+            codes.put(transfer.getId(), emailService.sendMail(profile.getEmail()));
+            return new ResponseEntity<>(new TransferDTO(transfer), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+
+    }
+
+    @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
+    @RequestMapping(value = "/operations/out/{id}", method = RequestMethod.PUT)
+    public ResponseEntity addTransferOut(@PathVariable("id") Integer id,
+                                         @RequestParam("code") Integer code,
+                                         Principal principal) {
             try {
-                final Account from = checkAccount(principal, id);
-                final Account to = accountManagement.getAccountById(toId);
-                accountManagement.updateBalance(new Transfer(from, to, Calendar.getInstance().getTime(), saldo, description));
+                final Transfer transfer = accountManagement.getTransferById(id);
+                checkAccount(principal, transfer.getFromAccount().getId());
+                checkVerificationCode(transfer.getId(), code);
+                accountManagement.updateBalance(transfer);
                 return new ResponseEntity(HttpStatus.OK);
+            } catch (AccessLockedException ex) {
+                accountManagement.deleteTransfer(id);
+                return new ResponseEntity<>(ex.getMessage(), HttpStatus.LOCKED);
             } catch (Exception ex) {
                 return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
             }
@@ -148,6 +177,14 @@ public class AccountRestController {
             throw new AccessLockedException("Attempt to access another's resources");
         }
         return account;
+    }
+
+    private void checkVerificationCode(Integer transferId, Integer code) throws RuntimeException {
+        Integer verify = codes.get(transferId);
+        codes.remove(transferId);
+        if (!Objects.equals(code, verify)) {
+            throw new AccessLockedException("Invalid code. Try again ...");
+        }
     }
 
 }

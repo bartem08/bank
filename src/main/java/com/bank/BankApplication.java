@@ -18,4 +18,5 @@ public class BankApplication {
 		return new BCryptPasswordEncoder();
 	}
 
+
 }

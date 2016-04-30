@@ -1,5 +1,7 @@
 package com.bank.model;
 
+import org.hibernate.validator.constraints.Email;
+
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -28,6 +30,10 @@ public class Profile implements Serializable {
     @Column(name = "password")
     private String password;
 
+    @NotNull @Email
+    @Column(name = "email")
+    private String email;
+
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -39,10 +45,11 @@ public class Profile implements Serializable {
 
     public Profile() {}
 
-    public Profile(String firstName, String lastName, String inn, String password, List<Role> roles, List<Account> accounts) {
+    public Profile(String firstName, String lastName, String inn, String password, List<Role> roles, List<Account> accounts, String email) {
         setFirstName(firstName);
         setLastName(lastName);
         setInn(inn);
+        setEmail(email);
         setPassword(password);
         setRoles(roles);
         setAccounts(accounts);
@@ -95,6 +102,14 @@ public class Profile implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public List<Role> getRoles() {

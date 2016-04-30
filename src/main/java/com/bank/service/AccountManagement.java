@@ -13,4 +13,10 @@ public interface AccountManagement extends AccountService {
 
     void closeDeposit(Deposit deposit);
 
+    Transfer saveTransfer(Transfer transfer);
+
+    Transfer getTransferById(Integer id);
+
+    void deleteTransfer(Integer id);
+
 }
