@@ -30,10 +30,11 @@ public class ProfileManagementImpl implements ProfileManagement {
             propagation = Propagation.REQUIRED,
             transactionManager = "transactionManager",
             rollbackFor = Exception.class)
-    public void createUser(Profile profile) {
+    public Profile createUser(Profile profile) {
         profile.setPassword(passwordEncoder.encode(profile.getPassword()));
-        profileRepository.save(profile);
+        profile = profileRepository.save(profile);
         createRole(new Role(profile, "ROLE_USER"));
+        return profile;
     }
 
     @Override

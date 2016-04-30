@@ -31,8 +31,8 @@ public class ProfileRestController {
                                        @RequestParam("inn") String inn,
                                        @RequestParam("password") String password,
                                        @RequestParam("email") String email) {
-        profileManagement.createUser(new Profile(firstName, lastName, inn, password, email));
-        return new ResponseEntity(HttpStatus.CREATED);
+        Profile profile = profileManagement.createUser(new Profile(firstName, lastName, inn, password, email));
+        return new ResponseEntity<>(new ProfileDTO(profile), HttpStatus.CREATED);
     }
 
 }
