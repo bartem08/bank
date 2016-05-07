@@ -23,12 +23,24 @@ public class Operation implements Serializable {
     @Column(name = "description")
     protected String description;
 
+    @Column(name = "confirmed")
+    protected boolean confirmed;
+
     public Operation() {}
 
     public Operation(float saldo, String date, String description) {
         setSaldo(saldo);
         setDate(date);
         setDescription(description);
+        setConfirmed(false);
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 
     public Integer getId() {

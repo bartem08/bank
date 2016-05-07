@@ -65,11 +65,30 @@ public class AccountRestController {
             );
             final Profile profile = profileService.findByInn(principal.getName());
             codes.put(transfer.getId(), emailService.sendMail(profile.getEmail()));
-            return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
+            return new ResponseEntity<>(new TransferDTO(transfer), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+        }
+    }
+
+    @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
+    @RequestMapping(value = "/{id}/operations/deposit", method = RequestMethod.PUT)
+    public ResponseEntity depositRequest(@PathVariable("id") Integer id,
+                                         @RequestParam("saldo") float saldo,
+                                         Principal principal) {
+        try {
+            final Account to = checkAccount(principal, id);
+            String DEPOSIT_MESSAGE = "Deposit was approved." +
+                    " In 30 days your account should have had requested amount.";
+            final Deposit deposit = accountManagement.saveDeposit(
+                    new Deposit(to, Calendar.getInstance().getTime(), saldo, DEPOSIT_MESSAGE)
+            );
+            final Profile profile = profileService.findByInn(principal.getName());
+            codes.put(deposit.getId(), emailService.sendMail(profile.getEmail()));
+            return new ResponseEntity<>(new DepositDTO(deposit), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
-
     }
 
     @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
@@ -82,13 +101,34 @@ public class AccountRestController {
                 checkAccount(principal, transfer.getFromAccount().getId());
                 checkVerificationCode(transfer.getId(), code);
                 accountManagement.updateBalance(transfer);
-                return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
+                return new ResponseEntity<>(new TransferDTO(transfer), HttpStatus.OK);
             } catch (AccessLockedException ex) {
                 accountManagement.deleteTransfer(id);
                 return new ResponseEntity<>(new Response(ex.getMessage(), "locked"), HttpStatus.LOCKED);
             } catch (Exception ex) {
+                accountManagement.deleteTransfer(id);
                 return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
             }
+    }
+
+    @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
+    @RequestMapping(value = "/operations/deposit/{id}", method = RequestMethod.PUT)
+    public ResponseEntity addDeposit(@PathVariable("id") Integer id,
+                                     @RequestParam("code") Integer code,
+                                     Principal principal) {
+        try {
+            final Deposit deposit = accountManagement.getDepositById(id);
+            checkAccount(principal, deposit.getToAccount().getId());
+            checkVerificationCode(deposit.getId(), code);
+            accountManagement.updateBalance(principal, deposit);
+            return new ResponseEntity<>(new DepositDTO(deposit), HttpStatus.OK);
+        } catch (AccessLockedException ex) {
+            accountManagement.deleteDeposit(id);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "locked"), HttpStatus.LOCKED);
+        } catch (Exception ex) {
+            accountManagement.deleteDeposit(id);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
+        }
     }
 
     @RequestMapping(value = "/{id}/operations/out", method = RequestMethod.GET)
@@ -103,7 +143,7 @@ public class AccountRestController {
                     .collect(Collectors.toList());
             return new ResponseEntity<>(transfers, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
     }
 
@@ -119,7 +159,7 @@ public class AccountRestController {
                     .collect(Collectors.toList());
             return new ResponseEntity<>(transfers, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
     }
 
@@ -135,20 +175,6 @@ public class AccountRestController {
                     .collect(Collectors.toList());
             return new ResponseEntity<>(deposits, HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.CONFLICT);
-        }
-    }
-
-    @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
-    @RequestMapping(value = "/{id}/operations/deposit", method = RequestMethod.PUT)
-    public ResponseEntity addDeposit(@PathVariable("id") Integer id,
-                                     @RequestParam("saldo") float saldo,
-                                     Principal principal) {
-        try {
-            final Account account = checkAccount(principal, id);
-            accountManagement.updateBalance(principal, new Deposit(account, Calendar.getInstance().getTime(), saldo));
-            return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
-        } catch (Exception ex) {
             return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
     }
@@ -159,12 +185,10 @@ public class AccountRestController {
                                        @RequestParam("d_id") int dId,
                                        Principal principal) {
         try {
-            final Account account = checkAccount(principal, id);
-            List<Deposit> deposits = account.getDeposits();
-            deposits.stream()
-                    .filter(deposit -> deposit.getId() == dId)
-                    .forEach(deposit -> accountManagement.closeDeposit(deposit));
-            return new ResponseEntity<>(new Response("success", "ok"), HttpStatus.OK);
+            checkAccount(principal, id);
+            final Deposit deposit = accountManagement.getDepositById(dId);
+            accountManagement.closeDeposit(deposit);
+            return new ResponseEntity<>(new DepositDTO(deposit), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }

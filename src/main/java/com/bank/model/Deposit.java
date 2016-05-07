@@ -19,8 +19,8 @@ public class Deposit extends Operation implements Serializable {
 
     public Deposit() {}
 
-    public Deposit(final Account toAccount, final Date date, final float saldo) {
-        super(saldo, new SimpleDateFormat("dd/MM/yyyy").format(date), "Deposit");
+    public Deposit(final Account toAccount, final Date date, final float saldo, final String des) {
+        super(saldo, new SimpleDateFormat("dd/MM/yyyy").format(date), des);
         setToAccount(toAccount);
         setClosed(false);
     }

@@ -1,6 +1,7 @@
 package com.bank.controller.rest;
 
 import com.bank.model.Profile;
+import com.bank.model.Response;
 import com.bank.model.dto.ProfileDTO;
 import com.bank.service.ProfileManagement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class ProfileRestController {
         try {
             return new ResponseEntity<>(new ProfileDTO(profileManagement.findByInn(principal.getName())), HttpStatus.OK);
         } catch (Exception ex) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
     }
 
@@ -34,7 +35,7 @@ public class ProfileRestController {
             Profile profile = profileManagement.createUser(new Profile(firstName, lastName, inn, password, email));
             return new ResponseEntity<>(new ProfileDTO(profile), HttpStatus.CREATED);
         } catch (Exception ex) {
-            return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
     }
 

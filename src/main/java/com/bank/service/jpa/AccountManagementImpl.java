@@ -32,6 +32,8 @@ public class AccountManagementImpl implements AccountManagement {
         decreaseBalance(from, transfer);
         final Account to = transfer.getToAccount();
         increaseBalance(to, transfer);
+        transfer.setConfirmed(true);
+        transferRepository.save(transfer);
         accountRepository.save(to);
         return accountRepository.save(from);
     }
@@ -47,7 +49,8 @@ public class AccountManagementImpl implements AccountManagement {
         } else {
             final Account account = deposit.getToAccount();
             increaseBalance(account, deposit);
-            saveOperation(deposit);
+            deposit.setConfirmed(true);
+            depositRepository.save(deposit);
             return accountRepository.save(account);
         }
     }
@@ -84,19 +87,30 @@ public class AccountManagementImpl implements AccountManagement {
     }
 
     @Override
+    public Deposit getDepositById(Integer id) {
+        return depositRepository.findOne(id);
+    }
+
+    @Override
     public void deleteTransfer(Integer id) {
         transferRepository.delete(id);
     }
 
+    @Override
+    public void deleteDeposit(Integer id) {
+        depositRepository.delete(id);
+    }
+
+    @Override
     @Transactional(isolation = Isolation.SERIALIZABLE,
             transactionManager = "transactionManager",
-            propagation = Propagation.MANDATORY,
+            propagation = Propagation.REQUIRED,
             rollbackFor = Exception.class)
-    private void saveOperation(final Deposit deposit) {
+    public Deposit saveDeposit(final Deposit deposit) {
         if (deposit.getId() != null) {
             throw new RuntimeException("Id must be null");
         } else {
-            depositRepository.save(deposit);
+            return depositRepository.save(deposit);
         }
     }
 
@@ -126,9 +140,13 @@ public class AccountManagementImpl implements AccountManagement {
     private boolean checkIfDepositExists(final Principal principal) {
         List<Account> accounts = accountRepository.findByProfileInn(principal.getName());
         for (Account account: accounts) {
-            Deposit deposit = depositRepository.findByToAccountId(account.getId());
-            if (deposit != null && !deposit.isClosed()) {
-                return false;
+            List<Deposit> deposits = account.getDeposits();
+            if (!deposits.isEmpty()) {
+                for (Deposit deposit : deposits) {
+                    if (!deposit.isClosed() && deposit.isConfirmed()) {
+                        return false;
+                    }
+                }
             }
         }
         return true;
