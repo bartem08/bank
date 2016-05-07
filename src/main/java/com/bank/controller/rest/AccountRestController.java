@@ -51,7 +51,7 @@ public class AccountRestController {
     }
 
     @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
-    @RequestMapping(value = "/{id}/operations/out", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}/operations/out", method = RequestMethod.POST)
     public ResponseEntity transferRequest(@PathVariable("id") Integer id,
                                          @RequestParam("to_id") Integer toId,
                                          @RequestParam("saldo") float saldo,
@@ -72,7 +72,7 @@ public class AccountRestController {
     }
 
     @PreAuthorize("#oauth2.clientHasRole('ROLE_USER')")
-    @RequestMapping(value = "/{id}/operations/deposit", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}/operations/deposit", method = RequestMethod.POST)
     public ResponseEntity depositRequest(@PathVariable("id") Integer id,
                                          @RequestParam("saldo") float saldo,
                                          Principal principal) {
