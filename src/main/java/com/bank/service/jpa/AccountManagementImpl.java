@@ -170,4 +170,14 @@ public class AccountManagementImpl implements AccountManagement {
         return accountRepository.findById(accountId);
     }
 
+    @Override
+    public Profile getProfileByAccountId(Integer id) {
+        final Account account = accountRepository.findById(id);
+        if (account != null) {
+            return account.getProfile();
+        } else {
+            return null;
+        }
+    }
+
 }

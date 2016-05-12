@@ -195,6 +195,20 @@ public class AccountRestController {
 
     }
 
+    @RequestMapping(value = "/{id}/user")
+    public ResponseEntity getAccountOwner(@PathVariable("id") Integer id) {
+        try {
+            Profile profile = accountManagement.getProfileByAccountId(id);
+            if (profile != null) {
+                return new ResponseEntity<>(new ProfileDTO(profile), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+            }
+        } catch (Exception ex) {
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
+        }
+    }
+
     private Account checkAccount(Principal principal, int id) throws RuntimeException {
         final Account account = accountManagement.getAccountById(id);
         if (!account.getProfile().getInn().equals(principal.getName())) {
