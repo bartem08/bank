@@ -4,11 +4,14 @@ import com.bank.exception.AccessLockedException;
 import com.bank.model.*;
 import com.bank.model.dto.*;
 import com.bank.service.*;
+import com.bank.util.DateRangeFormer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -142,6 +145,48 @@ public class AccountRestController {
                     .map(TransferDTO::new)
                     .collect(Collectors.toList());
             return new ResponseEntity<>(transfers, HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
+        }
+    }
+
+    @RequestMapping(value = "/{id}/operations/out/date", method = RequestMethod.POST)
+    public ResponseEntity getTransfersOutByDate(@PathVariable("id") Integer id,
+                                                @RequestParam("from") String from,
+                                                @RequestParam("to") String to,
+                                                Principal principal) {
+        try {
+            final Account account = checkAccount(principal, id);
+            List<Transfer> transfers = account.getOutTransfers();
+            return new ResponseEntity<>(DateRangeFormer.formTransfers(transfers, from, to), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
+        }
+    }
+
+    @RequestMapping(value = "/{id}/operations/in/date", method = RequestMethod.POST)
+    public ResponseEntity getTransfersInByDate(@PathVariable("id") Integer id,
+                                                @RequestParam("from") String from,
+                                                @RequestParam("to") String to,
+                                                Principal principal) {
+        try {
+            final Account account = checkAccount(principal, id);
+            List<Transfer> transfers = account.getInTransfers();
+            return new ResponseEntity<>(DateRangeFormer.formTransfers(transfers, from, to), HttpStatus.OK);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
+        }
+    }
+
+    @RequestMapping(value = "/{id}/operations/deposit/date", method = RequestMethod.POST)
+    public ResponseEntity getDepositsByDate(@PathVariable("id") Integer id,
+                                            @RequestParam("from") String from,
+                                            @RequestParam("to") String to,
+                                            Principal principal) {
+        try {
+            final Account account = checkAccount(principal, id);
+            List<Deposit> deposits = account.getDeposits();
+            return new ResponseEntity<>(DateRangeFormer.formDeposits(deposits, from, to), HttpStatus.OK);
         } catch (Exception ex) {
             return new ResponseEntity<>(new Response(ex.getMessage(), "conflict"), HttpStatus.CONFLICT);
         }
